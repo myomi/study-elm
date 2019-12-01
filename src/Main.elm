@@ -110,6 +110,34 @@ type alias Time =
     }
 
 
+hourParser : String -> P.Parser Int
+hourParser x =
+    case String.toInt x of
+        Just n ->
+            if n >= 0 && n <= 23 then
+                P.succeed n
+
+            else
+                P.problem ("invalid min: " ++ x)
+
+        Nothing ->
+            P.problem ("invalid min: " ++ x)
+
+
+minParser : String -> P.Parser Int
+minParser x =
+    case String.toInt x of
+        Just n ->
+            if n >= 0 && n <= 59 then
+                P.succeed n
+
+            else
+                P.problem ("invalid min: " ++ x)
+
+        Nothing ->
+            P.problem ("invalid min: " ++ x)
+
+
 {-| 時刻フォーマットのバリデーション
 00:00 ～ 23:59
 -}
@@ -118,20 +146,18 @@ isTime src =
     let
         timeParser =
             P.succeed Time
-                |= P.int
+                |= (P.getChompedString (P.chompWhile Char.isDigit)
+                        |> P.andThen hourParser
+                   )
                 |. P.symbol ":"
-                |= P.int
+                |= (P.getChompedString (P.chompWhile Char.isDigit)
+                        |> P.andThen minParser
+                   )
+                |. P.end
     in
     case P.run timeParser src of
-        Ok time ->
-            time.hour
-                >= 0
-                && time.hour
-                <= 23
-                && time.minute
-                >= 0
-                && time.minute
-                <= 59
+        Ok _ ->
+            True
 
         Err _ ->
             False
