@@ -110,32 +110,40 @@ type alias Time =
     }
 
 
-hourParser : String -> P.Parser Int
-hourParser x =
-    case String.toInt x of
-        Just n ->
-            if n >= 0 && n <= 23 then
-                P.succeed n
+hourParser : P.Parser Int
+hourParser =
+    P.getChompedString (P.chompWhile Char.isDigit)
+        |> P.andThen
+            (\x ->
+                case String.toInt x of
+                    Just n ->
+                        if n >= 0 && n <= 23 then
+                            P.succeed n
 
-            else
-                P.problem ("invalid min: " ++ x)
+                        else
+                            P.problem ("invalid hour: " ++ x)
 
-        Nothing ->
-            P.problem ("invalid min: " ++ x)
+                    Nothing ->
+                        P.problem ("invalid hour: " ++ x)
+            )
 
 
-minParser : String -> P.Parser Int
-minParser x =
-    case String.toInt x of
-        Just n ->
-            if n >= 0 && n <= 59 then
-                P.succeed n
+minParser : P.Parser Int
+minParser =
+    P.getChompedString (P.chompWhile Char.isDigit)
+        |> P.andThen
+            (\x ->
+                case String.toInt x of
+                    Just n ->
+                        if n >= 0 && n <= 59 then
+                            P.succeed n
 
-            else
-                P.problem ("invalid min: " ++ x)
+                        else
+                            P.problem ("invalid min: " ++ x)
 
-        Nothing ->
-            P.problem ("invalid min: " ++ x)
+                    Nothing ->
+                        P.problem ("invalid min: " ++ x)
+            )
 
 
 {-| 時刻フォーマットのバリデーション
@@ -146,13 +154,9 @@ isTime src =
     let
         timeParser =
             P.succeed Time
-                |= (P.getChompedString (P.chompWhile Char.isDigit)
-                        |> P.andThen hourParser
-                   )
+                |= hourParser
                 |. P.symbol ":"
-                |= (P.getChompedString (P.chompWhile Char.isDigit)
-                        |> P.andThen minParser
-                   )
+                |= minParser
                 |. P.end
     in
     case P.run timeParser src of
