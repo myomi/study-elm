@@ -1,0 +1,6 @@
+{
+    "elmLS.elmFormatPath": "./node_modules/.bin/elm-format",
+    "elmLS.elmPath": "./node_modules/.bin/elm",
+    "elmLS.elmTestPath": "./node_modules/.bin/elm-test",
+    "editor.formatOnSave": true
+}
